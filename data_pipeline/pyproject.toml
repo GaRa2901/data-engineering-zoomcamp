@@ -22,3 +22,11 @@ data-pipeline = "data_pipeline:main"
 [build-system]
 requires = ["uv_build>=0.12.5,<0.13.0"]
 build-backend = "uv_build"
+
+# installed through uv add --dev pgcli -> the --dev argument indicates uv to create a group of dependencies named dev apart from the main dependencies.
+# The reason for it is that I would only want to use this dependencies while I'm in development.
+[dependency-groups]
+dev = [
+    "jupyter>=1.1.1",
+    "pgcli>=4.5.0",
+]
