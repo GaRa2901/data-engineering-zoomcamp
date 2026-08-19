@@ -1,2 +1,2 @@
 # data-engineering-zoomcamp
-Repository for data engineering zoomcamp couse
+Repository for data engineering zoomcamp course
