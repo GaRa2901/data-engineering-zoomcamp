@@ -5,9 +5,13 @@ import pandas as pd
 from sqlalchemy import create_engine
 from tqdm.auto import tqdm  # progress bar
 import click  # command-line argument parsing
+import os
 
-file_path = "/workspaces/data-engineering-zoomcamp/data_pipeline/yellow_tripdata_2021-01.csv"
+cwd = os.getcwd()
 
+file_path = os.path.join(cwd, "yellow_tripdata_2021-01.csv")
+#f"{cwd}/yellow_tripdata_2021-01.csv"
+print(file_path)
 dtype = {
     "VendorID": "Int64",
     "passenger_count": "Int64",
@@ -69,7 +73,7 @@ def run(pg_user, pg_pass, pg_host, pg_port, pg_db, target_table):
             df_chunck.head(0).to_sql(
                 name=target_table,
                 con=engine,
-                if_exists='replace'
+                if_exists='replace'  # drop if the table exists and create again.
             )
             first = False
 

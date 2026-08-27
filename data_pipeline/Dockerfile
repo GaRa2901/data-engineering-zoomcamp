@@ -17,6 +17,8 @@ COPY pyproject.toml .python-version uv.lock ./
 # install dependencies created locally (stored on uv.lock). UV also checks for changes made.
 RUN uv sync --locked 
 
-COPY pipeline.py .
+COPY yellow_tripdata_2021-01.csv .
 
-ENTRYPOINT ["python", "pipeline.py"]
+COPY ingest_data.py .
+
+ENTRYPOINT ["python", "ingest_data.py"]
