@@ -39,3 +39,4 @@ docker run -it \
 - The docker-compose.yaml has the 3 containers used until now, one with the data ingestion pipeline (parses data from the .csv, creates a table on the database and inserts the data), one with the actual POSTGRES database, and one with the pgadmin web interface for Database Management.
 
 ## SQL REFRESHER
+- Added new table with new data (check ingest_data.py) to be in accordance with the video. Also added a new container on the compose file to create the zones data.

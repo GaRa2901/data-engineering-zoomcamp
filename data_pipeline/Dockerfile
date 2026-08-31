@@ -18,7 +18,12 @@ COPY pyproject.toml .python-version uv.lock ./
 RUN uv sync --locked 
 
 COPY yellow_tripdata_2021-01.csv .
+COPY taxi_zone_lookup.csv .
 
 COPY ingest_data.py .
 
+# Entrypoint defines the main executable
 ENTRYPOINT ["python", "ingest_data.py"]
+
+# Defines default arguments in case none is given.
+CMD ["-h"]

@@ -9,9 +9,11 @@ import os
 
 cwd = os.getcwd()
 
-file_path = os.path.join(cwd, "yellow_tripdata_2021-01.csv")
-#f"{cwd}/yellow_tripdata_2021-01.csv"
-print(file_path)
+taxi_data_files = {
+    "taxi_trip_path": os.path.join(cwd, "yellow_tripdata_2021-01.csv"),
+    "taxi_zone_path": os.path.join(cwd, "taxi_zone_lookup.csv")
+}
+
 dtype = {
     "VendorID": "Int64",
     "passenger_count": "Int64",
@@ -42,29 +44,34 @@ parse_dates = [
 @click.option('--pg-host', default='pgdatabase', help='PostgreSQL host')
 @click.option('--pg-port', default=5432, type=int, help='PostgreSQL port')
 @click.option('--pg-db', default='ny_taxi', help='PostgreSQL database name')
-@click.option('--target-table', default='yellow_taxi_data', help='Target table name')
+@click.option('--target-table', default='yellow_taxi_trips', help='Target table name')
 
 def run(pg_user, pg_pass, pg_host, pg_port, pg_db, target_table):
-    # Ingestion logic here
-    df = pd.read_csv(
-        file_path,
-        dtype=dtype,
-        parse_dates=parse_dates
-    )
 
     # Through sqlalchemy pandas is able to insert data and communicate with DBMS (MySQL, PostGreSQL, ...)
     engine = create_engine(f'postgresql+psycopg://{pg_user}:{pg_pass}@{pg_host}:{pg_port}/{pg_db}')
 
-    # Creating table schema (this command only outputs the columns)
+    # Ingestion logic here
+    if target_table == "yellow_taxi_trips":
 
-    df_iter = pd.read_csv(
-        file_path,
-        dtype=dtype,
-        parse_dates=parse_dates,
-        iterator=True,
-        chunksize=100000,
-    )
+        df_iter = pd.read_csv(
+            taxi_data_files["taxi_trip_path"],
+            dtype=dtype,
+            parse_dates=parse_dates,
+            iterator=True,
+            chunksize=100000,
+        )
 
+    elif target_table == "zones":
+        
+        df_iter = pd.read_csv(
+            taxi_data_files["taxi_zone_path"],
+            iterator=True,
+            chunksize=100000,
+        )
+
+    else:
+        raise ValueError("Invalid Table.")
     # Loading data into DB in chuncks
     first = True
     for df_chunck in tqdm(df_iter): # iterates for each chunck and add it to the Database.
@@ -78,7 +85,7 @@ def run(pg_user, pg_pass, pg_host, pg_port, pg_db, target_table):
             first = False
 
         df_chunck.to_sql(name=target_table, con=engine, if_exists='append')
-    print('done')
+        print('done')
 
 if __name__ == '__main__':
     run()
