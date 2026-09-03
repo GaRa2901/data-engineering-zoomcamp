@@ -40,3 +40,139 @@ docker run -it \
 
 ## SQL REFRESHER
 - Added new table with new data (check ingest_data.py) to be in accordance with the video. Also added a new container on the compose file to create the zones data.
+- Below SQL statements made through pgadmin4 web interface.
+### Joining tables
+1. First approach is to get all instances from each table, connect the columns that represent the same data and connect them through a WHERE clause.
+```
+SELECT 
+	tpep_pickup_datetime,
+	tpep_dropoff_datetime,
+	total_amount,
+	CONCAT(zpu."Borough", ' / ', zpu."Zone") AS "pick_up_loc",  # The CONCAT function here is POSTGRESQL way of joinining records values in a new column named "pick_up_loc".
+	CONCAT(zdo."Borough", ' / ', zdo."Zone") AS "drop_off_loc"
+FROM yellow_taxi_trips AS t, zones AS zpu, zones AS zdo
+WHERE 
+	t."PULocationID" = zpu."LocationID" AND
+	t."DOLocationID" = zdo."LocationID"
+LIMIT 100;
+```
+
+2. Second approach is to explicitly define the JOINS of the tables and the columns that must be JOINED together
+
+```
+SELECT 
+	tpep_pickup_datetime,
+	tpep_dropoff_datetime,
+	total_amount,
+	CONCAT(zpu."Borough", ' / ', zpu."Zone") AS "pick_up_loc",
+	CONCAT(zdo."Borough", ' / ', zdo."Zone") AS "drop_off_loc"
+FROM yellow_taxi_trips AS t 
+    JOIN zones AS zpu ON t."PULocationID" = zpu."LocationID"
+	JOIN zones AS zdo ON t."DOLocationID" = zdo."LocationID"
+LIMIT 100;
+```
+
+#### Checking if any record stored on one table column do not exist on the equivalent column in the other table
+```
+SELECT 
+	tpep_pickup_datetime,
+	tpep_dropoff_datetime,
+	total_amount,
+	"PULocationID",
+	"DOLocationID"
+FROM yellow_taxi_trips AS t
+WHERE t."DOLocationID" NOT IN (SELECT z."LocationID" FROM zones AS z)
+LIMIT 100;
+```
+
+#### Deleting a set of records from a table 
+```
+DELETE FROM zones AS z
+
+WHERE z."LocationID" = 142
+```
+
+### Showing all records from one table regardless of existing on the other table
+```
+SELECT 
+	tpep_pickup_datetime,
+	tpep_dropoff_datetime,
+	total_amount,
+	CONCAT(zpu."Borough", ' / ', zpu."Zone") AS "pick_up_loc",
+	CONCAT(zdo."Borough", ' / ', zdo."Zone") AS "drop_off_loc"
+FROM yellow_taxi_trips AS t 
+    LEFT JOIN zones AS zpu ON t."PULocationID" = zpu."LocationID"
+	LEFT JOIN zones AS zdo ON t."DOLocationID" = zdo."LocationID"
+LIMIT 100;
+```
+- LEFT JOIN indicates the Database to show all records from the first (LEFT) table, regardless of the column being JOINED value is null. Whereas the RIGHT JOIN does the opposite, while the JOIN only shows the records that exist simultaneously in both tables.
+- OUTER JOIN is the combination of both LEFT and RIGHT, meaning that all records will appear regardless they having a match on the joined field.
+
+
+### Chaging a column data format and name for being more human readable
+```
+SELECT 
+	CAST(tpep_dropoff_datetime AS DATE) as "day",
+	total_amount
+FROM yellow_taxi_trips AS t 
+    LEFT JOIN zones AS zpu ON t."PULocationID" = zpu."LocationID"
+	LEFT JOIN zones AS zdo ON t."DOLocationID" = zdo."LocationID"
+LIMIT 100;
+```
+- CAST changes the datetime field format to only display the date part (without the time, in this case this change wouldn't work in other fields with type different from DATE)
+
+### Aggregating records for summarized view
+```
+SELECT 
+	CAST(tpep_dropoff_datetime AS DATE) as "day",
+	COUNT(1) as "count"
+FROM yellow_taxi_trips AS t 
+GROUP BY 
+	CAST(tpep_dropoff_datetime AS DATE)
+ORDER BY "count" DESC
+```
+- COUNT indicates the number of times to count a record when it appears and the GROUP BY statement groups each record based on its value. Records with the same record value are counted as belonging to the same group.
+- ORDER BY organizes the records from top to bottom based on the value in the count column.
+
+#### MAX for integer fields
+```
+SELECT 
+	CAST(tpep_dropoff_datetime AS DATE) as "day",
+	COUNT(1) as "count",
+	MAX(total_amount)
+FROM yellow_taxi_trips AS t 
+GROUP BY 
+	CAST(tpep_dropoff_datetime AS DATE)
+ORDER BY "count" DESC;
+```
+- MAX allows aggregating the MAXIMUM integer value existing in one of the records aggregated.
+
+#### GROUP BY can be used with more than one reference field
+```
+SELECT 
+	CAST(tpep_dropoff_datetime AS DATE) as "day",
+	"DOLocationID",
+	COUNT(1) as "count",
+	MAX(total_amount)
+FROM yellow_taxi_trips AS t 
+GROUP BY 
+	1,2
+ORDER BY "count" DESC;
+```
+- And it's also possible to reference the desired reference columns by their index order on the SELECT statement.
+
+```
+SELECT 
+	CAST(tpep_dropoff_datetime AS DATE) as "day",
+	"DOLocationID",
+	COUNT(1) as "count",
+	MAX(total_amount)
+FROM yellow_taxi_trips AS t 
+GROUP BY 
+	1,2
+ORDER BY 
+"day" DESC,
+"DOLocationID" DESC,
+;
+```
+- This multi-field reference can also be achive with the ORDER BY statement.
