@@ -216,3 +216,9 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# GCP Creds
+terraform_tutorial/keys*
+
+# Data Pipeline CSV
+data_pipeline/*.csv
