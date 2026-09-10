@@ -60,3 +60,18 @@ The initial content of this video concerns the GCP configuration :https://www.yo
 - Once the main.tf file was defined with basic GCP provider config, to fix the file internal format, terraform has the following command:
 `terraform fmt`
 This will adjust all lines to be in the correct indentation, for every .tf file within the folder where it was executed.
+
+### Avoiding defining credentials on main.tf file
+- Another approach is to use gcloud but it would be using the user account, thus the account with all the permisions.
+- Another way is to define the path to the credentials JSON file to the GOOGLE CLOUD environment variables, it can be done through the following command:
+```
+export GOOGLE_CREDENTIALS='path/to/creds'
+``` 
+To test whether the modification was succesfull, simply echo the env variable (e.g. $GOOGLE_CREDENTIALS)
+
+### Initializing terraform connection
+- Executing terraform init, and with the main.tf file ready and creds to GCP, terraform will stablish connection with it.
+
+## Creating a Storage Bucket on GCP with terraform
+- First thing is to get the terraform settings to build the google storage, which can be found here: https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/storage_bucket
+- To better undestand the configuration files variables, reading the docs is the best way to get the meaning of each field.

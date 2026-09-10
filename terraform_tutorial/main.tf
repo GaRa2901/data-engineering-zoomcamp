@@ -12,3 +12,5 @@ provider "google" {
   project = "dataengineeringzoomcamp-507920"  # retrived from GCP project Dashboard page (accessible through the lateral nav bar within the option Cloud Overview)
   region  = "europe-southwest1"  # Portugal Region.
 }
+
+# Credentials defined on GOOGLE_CREDENTIALS environment variable.
