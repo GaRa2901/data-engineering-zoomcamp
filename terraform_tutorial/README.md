@@ -60,6 +60,8 @@ The initial content of this video concerns the GCP configuration :https://www.yo
 - Once the main.tf file was defined with basic GCP provider config, to fix the file internal format, terraform has the following command:
 `terraform fmt`
 This will adjust all lines to be in the correct indentation, for every .tf file within the folder where it was executed.
+Additionally, if it's desired to validate the code, in terms of syntax and consistency, the following command can be executed (withou the need for terraform plan)
+`terraform validate`
 
 ### Avoiding defining credentials on main.tf file
 - Another approach is to use gcloud but it would be using the user account, thus the account with all the permisions.
@@ -67,6 +69,11 @@ This will adjust all lines to be in the correct indentation, for every .tf file 
 ```
 export GOOGLE_CREDENTIALS=$(cat $(pwd)/path/to/creds)
 ``` 
+- If it's desired to pass only the path to the creds.json file, the env variable to be used is the following:
+```
+export GOOGLE_APPLICATION_CREDENTIALS='path/to/creds.json' 
+```
+
 To test whether the modification was succesfull, simply echo the env variable (e.g. $GOOGLE_CREDENTIALS)
 
 ### Initializing terraform connection
@@ -98,3 +105,6 @@ terraform destroy
 Now the bucket was erased.
 
 Once erased, terraform will create a tfstate.backup file, which, as the name indicates, it can be use to return to the previous state the project was.
+
+## SECURITY INFO
+- With the above creation and deletion of resources, terraform created some files that are sensible and cannot be commited to GitHub, since it may cause a security breach on the project. Therefore, the files that should never be shared are the .tfstate, tfstate.backup or .json files related with terraform. These files contain sensible data, and should always be defined on .gitignore.
