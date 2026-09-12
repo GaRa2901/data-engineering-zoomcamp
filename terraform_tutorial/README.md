@@ -108,3 +108,5 @@ Once erased, terraform will create a tfstate.backup file, which, as the name ind
 
 ## SECURITY INFO
 - With the above creation and deletion of resources, terraform created some files that are sensible and cannot be commited to GitHub, since it may cause a security breach on the project. Therefore, the files that should never be shared are the .tfstate, tfstate.backup or .json files related with terraform. These files contain sensible data, and should always be defined on .gitignore.
+
+## Terraform Variables
