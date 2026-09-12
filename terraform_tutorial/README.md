@@ -63,9 +63,9 @@ This will adjust all lines to be in the correct indentation, for every .tf file 
 
 ### Avoiding defining credentials on main.tf file
 - Another approach is to use gcloud but it would be using the user account, thus the account with all the permisions.
-- Another way is to define the path to the credentials JSON file to the GOOGLE CLOUD environment variables, it can be done through the following command:
+- Another way is to associated the credentials JSON file content to the GOOGLE CLOUD environment variables, it can be done through the following command:
 ```
-export GOOGLE_CREDENTIALS='path/to/creds'
+export GOOGLE_CREDENTIALS=$(cat $(pwd)/path/to/creds)
 ``` 
 To test whether the modification was succesfull, simply echo the env variable (e.g. $GOOGLE_CREDENTIALS)
 
@@ -75,3 +75,26 @@ To test whether the modification was succesfull, simply echo the env variable (e
 ## Creating a Storage Bucket on GCP with terraform
 - First thing is to get the terraform settings to build the google storage, which can be found here: https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/storage_bucket
 - To better undestand the configuration files variables, reading the docs is the best way to get the meaning of each field.
+
+Once the bucket is defined with a terraform resource statement (more info about the configs used on the main.tf file), before commiting the changes to GCP
+it's important to check if the connection with the provider has everything to be succesful (making sure the credentials are in the correct place).
+Once the bucket is defined with the desired configurations the following the terraform commands are executed to ensure that it will be created accordingly to 
+the configuration file instructions:
+```
+terraform plan (outputs what it's going to be created in GCP) -> Review what is going to be created, if it is being created what it's assumed.
+
+terraform apply -> commits the requested resources to GCP.
+```
+
+Once done, terraform will output whether the process went succesfully or not, and the bucket will be available on GCP project.
+
+Additionaly, once the apply command is executed the .tfstate file will be created, which will indicate what is the current state of our project when it comes to resources. Useful to know the state of the project.
+
+### Destroying the bucket
+- To destroy the resources created through terraform, a simple command can be executed:
+```
+terraform destroy
+```
+Now the bucket was erased.
+
+Once erased, terraform will create a tfstate.backup file, which, as the name indicates, it can be use to return to the previous state the project was.
